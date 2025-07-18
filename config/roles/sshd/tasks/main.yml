@@ -1,0 +1,32 @@
+---
+# tasks file for roles/sshd
+- name: installation sshd 
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+- name: Collecter les facts (si désactivés)
+  ansible.builtin.setup:
+    gather_subset: all
+
+
+#- name: Sauvegarder les facts au format JSON
+# copy:
+#    content: "{{ ansible_facts | to_nice_json }}"
+#    dest: "./facts_{{ inventory_hostname }}.json"
+#  delegate_to: localhost 
+
+- name : Afficher l'IP de ens18 si présente
+  ansible.builtin.debug:
+    msg: "L'adresse IP de ens18 est {{ ansible_facts['default_ipv4']['address'] }}"
+  when: ansible_default_ipv4.address is defined
+
+- name: Déployer la configuration SSH custom
+  ansible.builtin.template:
+    src: custom.conf.j2
+    backup: true
+    dest: /etc/ssh/sshd_config.d/custom.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart_sshd

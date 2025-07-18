@@ -1,0 +1,35 @@
+---
+# defaults file for roles/sshd
+ssh_listen_address: "{{ ansible_facts['default_ipv4']['address'] | default('0.0.0.0') }}"
+ssh_address_family: "inet"
+ssh_protocol: 2
+ssh_log_level: "VERBOSE"
+ssh_ciphers: "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com"
+ssh_macs: "hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com"
+ssh_kex_algorithms: "curve25519-sha256,curve25519-sha256@libssh.org"
+
+ssh_permit_root_login: "prohibit-password"
+
+ssh_password_authentication: "no"
+ssh_challenge_response_authentication: "no"
+ssh_use_pam: "no"
+ssh_authentication_methods: "publickey"
+ssh_pubkey_authentication: "yes"
+
+ssh_allow_tcp_forwarding: "no"
+ssh_x11_forwarding: "no"
+ssh_permit_tunnel: "no"
+ssh_permit_empty_passwords: "no"
+
+ssh_login_grace_time: 20
+ssh_max_auth_tries: 3
+ssh_max_sessions: 2
+
+ssh_allow_users: "ansible"
+
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_compression: "no"
+ssh_print_motd: "no"
+ssh_use_dns: "no"
+ssh_allow_agent_forwarding: "no"

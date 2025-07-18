@@ -1,0 +1,21 @@
+---
+# tasks file for roles/dns-host
+- name: deploiement du fichier hosts
+  ansible.builtin.template:
+    backup: true
+    dest: /etc/hosts
+    group: root
+    mode: "0644"
+    owner: root
+    src: hosts.j2
+
+- name : déploiement du fichier resolv.conf
+  ansible.builtin.template:
+    backup: true
+    dest: /etc/resolv.conf
+    group: root
+    mode: "0644"
+    owner: root
+    src: resolv.conf.j2  
+  
+  

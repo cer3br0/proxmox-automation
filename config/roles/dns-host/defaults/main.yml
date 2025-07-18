@@ -1,0 +1,23 @@
+---
+# defaults file for roles/dns-host
+custom_hosts:
+  - ip: "xx.xx.xx.xx"
+    name: "host1"
+    aliases: ["gw", "dns1"]
+  - ip: "xx.xx.xx.xx"
+    name: "host2"
+  - ip: "xx.xx.xx.xx"
+    name: "host3"
+  - ip: "xx.xx.xx.xx"
+    name: "host4"
+    aliases: ["dns2"]
+  - ip: "xx.xx.xx.xx"
+    name: "host5"
+    
+nameservers:
+  - "xx.xx.xx.xx"
+  - "xx.xx.xx.xx"
+  - "xx.xx.xx.xx"
+
+search_domains:
+  - "home.lan"

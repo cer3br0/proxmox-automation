@@ -1,0 +1,41 @@
+---
+# User and group management
+users_create_home: true
+users_default_shell: /bin/bash
+admin_group: "{{ 'sudo' if ansible_os_family == 'Debian' else 'wheel' }}"
+# Home directory permissions
+users_home_mode: '0755'
+
+# Groups to create
+users_groups:
+  - name: admins
+    gid: 3000
+    state: present
+
+# Users to create
+users_list:
+  - name: example 
+    groups: [ "{{ admin_group }}", "admins" ]
+    shell: /bin/bash
+    home: /home/example
+    create_home: true
+    password: '$6$rounds=656000$...'  # Use ansible-vault encrypt_string
+    ssh_key: "ssh-ed25519 ...."
+    state: present
+
+# Users to remove
+users_remove: []
+
+# SSH key management
+# users_ssh_key_type: ed25519
+# users_ssh_key_bits: 4096
+
+# Bash configuration
+users_configure_bashrc: true
+users_bashrc_aliases:
+  - { alias: ll, command: 'ls -lah --color=auto' }
+  - { alias: nanoif, command: 'nano /etc/network/interfaces' }
+  - { alias: nanossh, command: 'nano /etc/ssh/sshd_config.d/custom.conf' }
+  - { alias: grep, command: 'grep --color=auto' }
+  - { alias: netrest, command: 'systemctl restart networking.service' }
+  - { alias: sshrest, command: 'systemctl restart sshd' }

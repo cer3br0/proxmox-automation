@@ -1,0 +1,5 @@
+- name: Config réseau de base
+  hosts: Debian
+  become: yes
+  roles:
+    - dns-host

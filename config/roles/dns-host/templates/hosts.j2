@@ -1,0 +1,7 @@
+# /etc/hosts - généré par Ansible
+127.0.0.1       localhost
+::1             localhost
+
+{% for host in custom_hosts %}
+{{ host.ip }}    {{ host.name }}{% if host.aliases %} {{ host.aliases | join(' ') }}{% endif %}
+{% endfor %}

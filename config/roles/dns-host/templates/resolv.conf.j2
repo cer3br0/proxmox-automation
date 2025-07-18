@@ -1,0 +1,9 @@
+# /etc/resolv.conf - généré par Ansible
+
+{% if search_domains is defined and search_domains | length > 0 %}
+search {{ search_domains | join(' ') }}
+{% endif %}
+
+{% for nameserver in nameservers %}
+nameserver {{ nameserver }}
+{% endfor %}

@@ -1,0 +1,5 @@
+- name: appliquer config users
+  hosts: Lab
+  become: true
+  roles:
+    - users

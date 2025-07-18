@@ -1,0 +1,94 @@
+---
+- name: Ensure 'sudo' group exists (Debian only)
+  group:
+    name: sudo
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure 'wheel' group exists (RedHat only)
+  group:
+    name: wheel
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Create groups
+  group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ users_groups }}"
+  become: true
+
+- name: Create users
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([admin_group]) | join(',') }}"
+    shell: "{{ item.shell | default(users_default_shell) }}"
+    home: "{{ item.home | default('/home/' + item.name) }}"
+    create_home: "{{ item.create_home | default(true) }}"
+    password: "{{ item.password | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ users_list }}"
+  become: true
+
+
+- name: Set home directory permissions
+  file:
+    path: "{{ item.home | default('/home/' + item.name) }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.group | default(item.name) }}"
+    mode: "{{ item.home_mode | default(755) }}"
+    state: directory
+  loop: "{{ users_list }}"
+  become: true
+  when: 
+    - item.state | default('present') == 'present'
+    - item.create_home | default(true)
+
+- name: Create .ssh directory
+  file:
+    path: "{{ item.home | default('/home/' + item.name) }}/.ssh"
+    owner: "{{ item.name }}"
+    group: "{{ item.group | default(item.name) }}"
+    mode: '0700'
+    state: directory
+  loop: "{{ users_list }}"
+  become: true
+  when: 
+    - item.state | default('present') == 'present'
+    - item.ssh_key is defined
+
+- name: Add SSH public keys
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_key }}"
+    state: present
+  loop: "{{ users_list }}"
+  become: true
+  when: 
+    - item.state | default('present') == 'present'
+    - item.ssh_key is defined
+
+- name: Configure bashrc
+  template:
+    src: bashrc.j2
+    dest: "{{ item.home | default('/home/' + item.name) }}/.bashrc"
+    owner: "{{ item.name }}"
+    group: "{{ item.group | default(item.name) }}"
+    mode: '0644'
+    backup: true
+  loop: "{{ users_list }}"
+  become: true
+  when: 
+    - item.state == 'present'
+    - users_configure_bashrc
+
+- name: Remove users
+  user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: "{{ item.remove_home | default(false) }}"
+  loop: "{{ users_remove }}"
+  become: true

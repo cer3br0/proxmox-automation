@@ -1,0 +1,45 @@
+# Écoute uniquement sur 1 interface (pas de bind sur toutes les IPs)
+ListenAddress {{ ssh_listen_address }}
+# IPv4 uniquement
+AddressFamily {{ ssh_address_family }}
+# Protocole et crypto
+Protocol {{ ssh_protocol }}
+LogLevel {{ ssh_log_level }}
+Ciphers {{ ssh_ciphers }}
+MACs {{ ssh_macs }}
+KexAlgorithms {{ ssh_kex_algorithms }}
+
+# Accès root restreint : uniquement par clé
+PermitRootLogin {{ ssh_permit_root_login }}
+
+# Authentification
+PasswordAuthentication {{ ssh_password_authentication }}
+ChallengeResponseAuthentication {{ ssh_challenge_response_authentication }}
+UsePAM {{ ssh_use_pam }}
+AuthenticationMethods {{ ssh_authentication_methods }}
+PubkeyAuthentication {{ ssh_pubkey_authentication }}
+
+# Empêche tunnel/forward inutiles
+AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}
+X11Forwarding {{ ssh_x11_forwarding }}
+PermitTunnel {{ ssh_permit_tunnel }}
+PermitEmptyPasswords {{ ssh_permit_empty_passwords }}
+
+# Timeouts
+LoginGraceTime {{ ssh_login_grace_time }}
+MaxAuthTries {{ ssh_max_auth_tries }}
+MaxSessions {{ ssh_max_sessions }}
+
+# Accès utilisateur
+AllowUsers {{ ssh_allow_users }}
+
+# Hardening divers
+ClientAliveInterval {{ ssh_client_alive_interval }}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+Compression {{ ssh_compression }}
+PrintMotd {{ ssh_print_motd }}
+UseDNS {{ ssh_use_dns }}
+AllowAgentForwarding {{ ssh_allow_agent_forwarding }}
+
+# SFTP désactivé si pas utilisé
+#Subsystem sftp /bin/false
