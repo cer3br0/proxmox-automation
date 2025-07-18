@@ -1,0 +1,67 @@
+# 🌍 Terraform / OpenTofu
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+terraform.tfvars.*
+.terraform.lock.hcl
+
+# 💾 Sensitive files
+.env
+.env.*
+*.bak
+
+# 🐧 SSH keys or credentials (if any)
+*.pem
+*.key
+*.crt
+*.csr
+*.pub
+
+# 🧪 Ansible secrets
+vault.yml
+*.vault
+*secrets*.yml
+
+# 🔧 Editor / OS files
+*.swp
+*.swo
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 📦 Python cache (si tu ajoutes des scripts ou playbooks Python plus tard)
+__pycache__/
+*.pyc
+
+# 📁 Git itself
+.git/
+# === Terraform ===
+*.tfstate
+*.tfstate.*
+.crash
+.terraform/
+.terraform.lock.hcl
+
+# === Fichiers sensibles ===
+.env
+.env.*
+*.secret
+*.key
+*.pem
+
+# === Ansible ===
+config/inventory.ini
+*.retry
+*.log
+*.vault
+
+# === Fichiers systèmes / OS ===
+.DS_Store
+Thumbs.db
+
+# === Fichiers temporaires / backup ===
+*.swp
+*.bak
+*.tmp

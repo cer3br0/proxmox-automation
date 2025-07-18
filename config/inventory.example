@@ -1,0 +1,33 @@
+[Deb-LAN]
+deblan1 ansible_host=192.168.10.11
+
+[Deb-SRV]
+debsrv1 ansible_host=192.168.10.21
+
+[Deb-DMZ]
+debdmz1 ansible_host=192.168.10.31
+
+[BDS]
+bds1 ansible_host=192.168.10.41
+
+[Rocky-LAN]
+rockylan1 ansible_host=192.168.20.11
+
+[Rocky-SRV]
+rockysrv1 ansible_host=192.168.20.21
+
+[Rocky-DMZ]
+rockydmz1 ansible_host=192.168.20.31
+
+[Lab]
+labvm1 ansible_host=192.168.30.10
+
+[Debian:children]
+Deb-DMZ
+Deb-LAN
+Deb-SRV
+
+[Rocky:children]
+Rocky-DMZ
+Rocky-LAN
+Rocky-SRV
