@@ -1,31 +1,37 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+Create, remove and manage users
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Compatibility for Debian and RedHat os family
 
 Role Variables
 --------------
+Warning: Vault logic is implemented for password encryption. See line 32 in in tasks/main/yaml ->     password:  "{{ vault_user_passwords[item.name] | default(omit) }}"
+You must modify this line only if you do not want to use encrypted passwords (DO NOT DO THIS IN PRODUCTION).
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+For vault use :
+Use python or mkpasswd to generate a SHA512-hashed password.
+Then, create an encrypted file (for example: ansible-vault create roles/users/vars/secret.yml) and define a dictionary with key/value pairs for each user in the following format:
 
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+vault_user_passwords:
+  user1:"hashed password"
+  user2:"hashed password"
+ 
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+- name: apply config users
+  hosts: all
+  become: true
+  roles:
+    - users
 
 License
 -------
