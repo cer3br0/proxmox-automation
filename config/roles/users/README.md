@@ -1,44 +1,56 @@
-Role Name
-=========
+# Role Name
 
-Create, remove and manage users 
+users
 
-Requirements
-------------
+## Description
 
-Compatibility for Debian and RedHat os family 
+Create, remove and manage users
 
-Role Variables
---------------
-Warning: Vault logic is implemented for password encryption. See line 32 in in tasks/main/yaml ->     password:  "{{ vault_user_passwords[item.name] | default(omit) }}"  
-You must modify this line only if you do not want to use encrypted passwords (DO NOT DO THIS IN PRODUCTION).  
+## Requirements
 
-For vault use :  
-Use python or mkpasswd to generate a SHA512-hashed password.  
-Then, create an encrypted file (for example: ansible-vault create roles/users/vars/secret.yml) and define a dictionary with key/value pairs for each user in the following format:   
+Compatibility for Debian and RedHat OS family
 
-vault_user_passwords:  
-  user1:"hashed password"   
-  user2:"hashed password"  
- 
+## Role Variables
 
-Example Playbook
-----------------
+**Warning:** Vault logic is implemented for password encryption. See line 32 in `tasks/main.yaml`:
+```yaml
+password: "{{ vault_user_passwords[item.name] | default(omit) }}"
+```
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:  
+You must modify this line only if you do not want to use encrypted passwords (**DO NOT DO THIS IN PRODUCTION**).
 
-- name: apply config users  
-  hosts: all  
-  become: true  
-  roles:  
-    - users  
+### For vault use:
 
-License
--------
+1. Use python or mkpasswd to generate a SHA512-hashed password
+2. Create an encrypted file (for example: `ansible-vault create roles/users/vars/secret.yml`)
+3. Define a dictionary with key/value pairs for each user in the following format:
+
+```yaml
+vault_user_passwords:
+  user1: "hashed password"
+  user2: "hashed password"
+```
+
+## Dependencies
+
+None
+
+## Example Playbook
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+
+```yaml
+- name: apply config users
+  hosts: all
+  become: true
+  roles:
+    - users
+```
+
+## License
 
 BSD
 
-Author Information
-------------------
+## Author Information
 
 An optional section for the role authors to include contact information, or a website (HTML is not allowed).
