@@ -3,5 +3,5 @@
 ::1             localhost
 
 {% for host in custom_hosts %}
-{{ host.ip }}    {{ host.name }}{% if host.aliases %} {{ host.aliases | join(' ') }}{% endif %}
+{{ host.ip }}    {{ host.name }}{% if host.aliases is defined and host.aliases %} {{ host.aliases | join(' ') }}{% endif %}
 {% endfor %}
