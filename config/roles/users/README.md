@@ -18,7 +18,9 @@ Use python or mkpasswd to generate a SHA512-hashed password.
 Then, create an encrypted file (for example: ansible-vault create roles/users/vars/secret.yml) and define a dictionary with key/value pairs for each user in the following format:
 
 vault_user_passwords:
+
   user1:"hashed password"
+  
   user2:"hashed password"
  
 
@@ -28,9 +30,13 @@ Example Playbook
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
 - name: apply config users
+  
   hosts: all
+  
   become: true
+  
   roles:
+  
     - users
 
 License
