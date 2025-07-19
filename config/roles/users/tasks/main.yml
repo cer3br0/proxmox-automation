@@ -23,12 +23,12 @@
   user:
     name: "{{ item.name }}"
     uid: "{{ item.uid | default(omit) }}"
-    group: "{{ item.group | default(item.name) }}"
+    group: "{{ item.group | default(omit) }}"
     groups: "{{ item.groups | default([admin_group]) | join(',') }}"
     shell: "{{ item.shell | default(users_default_shell) }}"
     home: "{{ item.home | default('/home/' + item.name) }}"
     create_home: "{{ item.create_home | default(true) }}"
-    password: "{{ item.password | default(omit) }}"
+    password:  "{{ vault_user_passwords[item.name] | default(omit) }}"
     state: "{{ item.state | default('present') }}"
   loop: "{{ users_list }}"
   become: true
