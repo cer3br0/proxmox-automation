@@ -40,7 +40,7 @@ vms = [
     # Cloud-init (optionnel)
     cloud_init = {
       user     = "admin"
-      password = "secure-password"  # Considérez l'utilisation de clés SSH plutôt
+      password = "secure-password"  # Obligatoire sinon le compte sera bloqué selon l'OS mais Considérez l'utilisation de clés SSH pour la connection
       ssh_keys = [
         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC... votre-cle-publique"
       ]
