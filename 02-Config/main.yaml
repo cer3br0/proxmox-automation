@@ -1,0 +1,17 @@
+- name: Configure {{ target }}
+  hosts: "{{ target }}"
+  become: true
+
+  tasks:
+    - name: Assert that 'roles' is a list
+      assert:
+        that:
+          - roles is defined
+          - roles is iterable
+        fail_msg: "'roles' must be a list (e.g. roles=['nginx','fail2ban'])"
+        success_msg: "'roles' is correctly defined as a list ✅"
+ 
+    - name: Include selected roles
+      include_role:
+        name: "{{ item }}"
+      loop: "{{ roles }}"

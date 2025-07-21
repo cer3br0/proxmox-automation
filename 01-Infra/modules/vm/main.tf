@@ -14,7 +14,6 @@ resource "proxmox_vm_qemu" "vm" {
   target_node = var.target_node
   vmid        = var.vmid
   desc        = var.description != "" ? var.description : "VM créée par Terraform - ${var.vm_name}"
-
   # Template source
   clone = var.template
   

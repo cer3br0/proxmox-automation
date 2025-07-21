@@ -32,6 +32,7 @@ variable "vms" {
     vmid        = optional(number)
     template    = string
     description = optional(string)
+    ansible_roles  = list(string)    
 
     # Ressources CPU/RAM
     cores    = number
@@ -70,3 +71,4 @@ variable "vms" {
   }))
   default = []
 }
+

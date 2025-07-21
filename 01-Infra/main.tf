@@ -16,6 +16,7 @@ module "vms" {
   vmid        = each.value.vmid
   template    = each.value.template
   description = each.value.description
+  roles       = join(",", each.value.ansible_roles)
 
   # Ressources
   cores    = each.value.cores
@@ -65,4 +66,21 @@ resource "null_resource" "update_inventory" {
   }
 
   depends_on = [module.vms]
+}
+
+resource "null_resource" "ansible_provision" {
+  for_each = module.vms
+
+  triggers = {
+    name     = each.value.vm_name
+    template = each.value.template
+    ip       = each.value.ip_address
+    roles   = join(",", each.value.ansible_roles)
+  }
+
+  provisioner "local-exec" {
+    command = "bash ./scripts/run_ansible.sh '${self.triggers.name}' '${self.triggers.ip}' '${self.triggers.template}' '${self.triggers.roles}'"
+
+  depends_on = [for r in null_resource.update_inventory : r]
+  }
 }
