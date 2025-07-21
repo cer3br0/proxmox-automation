@@ -12,8 +12,7 @@ This project automates the deployment and configuration of VMs on Proxmox server
 
 ## Architecture explanation 
 This project using terraform with vm module to deploy one or more VM on Proxmox server, and configure VM including roles for 
-![Infrastructure Workflow](./09-resources/infrastructure-workflow.svg)
-
+![Infrastructure Workflow](./09-resources/infrastructure_diagram.png)
 
 There are 2 main directories in this projet :  
 ```
