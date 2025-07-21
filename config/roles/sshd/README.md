@@ -1,38 +1,55 @@
-Role Name
-=========
+# Role Name
 
-A brief description of the role goes here.
+`sshd`
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Config / hardening sshd (openssh-server).
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Compatibility for Debian and RedHat OS family.
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+**Warning:** Ansible facts are used to restrict ssh access to the main interface **(see in ./default/main.yml line 1)**. However, a default value **(0.0.0.0)** is set to prevent connection issue is an error occurs while collecting network facts.
+```yaml
+ssh_listen_address: "{{ ansible_facts['default_ipv4']['address'] | default('0.0.0.0') }}"
+```
 
-Example Playbook
-----------------
+## Custom existing value  
+Edit value in **./defaults/main.yaml** to override default configuration.
+
+## Add another SSHD option  
+```
+- Edit the jinja template ./templates/custom.conf.j2
+- Add corresponding key/value in ./defaults/main.yaml
+```
+
+## Debugging : Save and display facts 
+If you encounter issues related to networks facts, you can enable the following task block in **./tasks/main.yml** to dump all collected facts to JSON file.  
+```yaml
+#- name: save fact to JSON format
+# copy:
+#    content: "{{ ansible_facts | to_nice_json }}"
+#    dest: "./facts_{{ inventory_hostname }}.json"
+#  delegate_to: localhost 
+```
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- name: apply sshd config
+  hosts: all
+  become: true
+  roles:
+    - sshd
+```
 
-License
--------
+## License
 
 BSD
 
-Author Information
-------------------
+## Author Information
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Cer3br0
