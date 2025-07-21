@@ -10,7 +10,31 @@ Create, remove and manage users
 
 Compatibility for Debian and RedHat OS family
 
-## Role Variables
+## Features
+
+-  Ensures the existence of system groups (`sudo` for Debian, `wheel` for RedHat)
+-  Creates users with optional:
+  - UID, GID
+  - Primary group and additional groups
+  - Custom shell
+  - Home directory (with control over creation and permissions)
+  - Passwords from Ansible Vault
+-  Manages SSH public keys:
+  - Creates `.ssh` directory
+  - Adds keys via `authorized_key`
+-  Deploys a custom `.bashrc` using a Jinja2 template (if enabled)
+-  Removes users cleanly, with optional deletion of home directories
+-  Fully configurable via variables
+
+## Required Variables
+
+- `users_list`: List of users to create
+- `users_groups`: List of custom groups to create
+- `vault_user_passwords`: Dictionary of passwords (optional, recommended to use Vault)
+- `users_configure_bashrc`: Boolean to enable `.bashrc` deployment
+- `users_remove`: List of users to remove
+
+## Vault using
 
 **Warning:** Vault logic is implemented for password encryption. See line 32 in `tasks/main.yaml`:
 ```yaml
@@ -30,6 +54,10 @@ vault_user_passwords:
   user1: "hashed password"
   user2: "hashed password"
 ```
+### Custom .bashrc : 
+
+Template **./templates/bashrc.j2 is used to define .bashrc custom aliases specifically, but it can easily be extended to support additional configurations
+
 
 ## Dependencies
 
