@@ -10,7 +10,12 @@
           - roles is iterable
         fail_msg: "'roles' must be a list (e.g. roles=['nginx','fail2ban'])"
         success_msg: "'roles' is correctly defined as a list ✅"
- 
+
+    - name: show roles
+      debug:
+        var: "{{ roles }}"
+
+
     - name: Include selected roles
       include_role:
         name: "{{ item }}"

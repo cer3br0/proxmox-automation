@@ -16,7 +16,6 @@ module "vms" {
   vmid        = each.value.vmid
   template    = each.value.template
   description = each.value.description
-
   # Ressources
   cores    = each.value.cores
   sockets  = each.value.sockets
@@ -44,6 +43,10 @@ module "vms" {
   # Tags
   tags = each.value.tags
 }
+locals {
+  vm_roles = { for vm in var.vms : vm.name => vm.ansible_roles }
+}
+
 
 resource "null_resource" "update_inventory" {
   for_each = module.vms
@@ -74,12 +77,12 @@ resource "null_resource" "ansible_provision" {
     name     = each.value.vm_name
     template = each.value.template
     ip       = each.value.ip_address
-    roles    = each.value.ansible_roles
+    roles    = join(",", local.vm_roles[each.value.vm_name])
   }
 
   provisioner "local-exec" {
-    command = "bash ./scripts/run_ansible.sh '${self.triggers.name}' '${self.triggers.ip}' '${self.triggers.template}' '${self.triggers.roles}'"
-
-  depends_on = [for r in null_resource.update_inventory : r]
+    command = "bash ./scripts/run_ansible.sh '${self.triggers.name}' '${self.triggers.ip}' '${self.triggers.template}' ${join(" ", local.vm_roles[each.value.vm_name])}"
   }
+  depends_on = [null_resource.update_inventory]
+  
 }

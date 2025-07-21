@@ -5,21 +5,27 @@ TEMPLATE_NAME="$3"
 shift 3
 roles=("$@")
 
+# Conversion des rôles en format JSON pour Ansible (plus sûr que YAML)
+roles_json=$(printf '"%s",' "${roles[@]}" | sed 's/,$//')
+roles_list="[$roles_json]"
+
 if [[ "$TEMPLATE_NAME" == *deb* ]]; then
   GROUP="Deb-SRV"
 elif [[ "$TEMPLATE_NAME" == *rocky* ]]; then
-  GROUP="Rocky-SRV"
+  GROUP="Rocky-srv"
 else
   GROUP="Lab"
 fi
 
 
-# Transformation du tableau roles en chaîne de type YAML pour Ansible
-roles_string=$(IFS=','; echo "${roles[*]}")
-
-echo "Running Ansible for $VM_NAME ($VM_IP) in group $GROUP with roles: ${roles[*]}"
+echo "Running Ansible for $VM_NAME ($VM_IP) in group $GROUP with roles: ${roles[*]} $roles_string"
+echo ""
+echo "commande lancée : ansible-playbook ../02-Config/main.yaml \
+  -i ../02-Config/inventory.ini \
+  --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible"
+echo ""
 
 # Lancer ansible-playbook avec tags ou rôles dynamiques
-ansible-playbook playbooks/main.yml \
-  -i /../02-Config/inventory.ini \
-  --extra-vars "target=$GROUP roles=[$roles_string]"
+ansible-playbook ../02-Config/main.yaml \
+  -i ../02-Config/inventory.ini \
+  --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible
