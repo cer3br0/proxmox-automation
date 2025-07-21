@@ -11,7 +11,7 @@ Create, remove and manage users
 Compatibility for Debian and RedHat OS family
 
 ## Features
-
+```
 -  Ensures the existence of system groups (`sudo` for Debian, `wheel` for RedHat)
 -  Creates users with optional:
   - UID, GID
@@ -25,6 +25,7 @@ Compatibility for Debian and RedHat OS family
 -  Deploys a custom `.bashrc` using a Jinja2 template (if enabled)
 -  Removes users cleanly, with optional deletion of home directories
 -  Fully configurable via variables
+```
 
 ## Required Variables
 
