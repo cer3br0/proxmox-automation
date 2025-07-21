@@ -1,14 +1,23 @@
 # Proxmox VM Automation :  
 
-This projet automates the deployment and configuration of VMs on Proxmox server using Terraform and Ansible  
+This project automates the deployment and configuration of VMs on Proxmox server using Terraform and Ansible  
 
-## Structure du projet  
+## Requirements
 
-There are 2 main directory in this projet :  
+ **Terraform/OpenTofu** installed  
+ **Ansible**  installed  
+ **Proxmox** with:  
+   - Dedicated user with appropriate permissions (using API token if possible)
+   - VM template ready for use (with cloud-init if you need it)
+
+
+## Projet structure  
+
+There are 2 main directories in this projet :  
 ```
-Infra -> Terraform directory for create VM
-- Cloud-init can be use for custom user/network/ssh key
-- Bash script for auto add/delete the deployed/removed VM in the inventory.ini (ansible)
+Infra -> Terraform directory to create VM
+- Cloud-init can be used to customize user/network/ssh key
+- Bash script to automatically add/remove the deployed/destroyed VM in the inventory.ini (ansible)
 
 config -> ansible directory with roles for :
 - create /manage users
@@ -39,15 +48,6 @@ Proxmox-automation
     └── variables.tf
 ```
 
-## Requirements
-
- **Terraform/OpenTofu** installed  
- **Ansible**  installed  
- **Proxmox** with :  
-   - Dedicated user with appropriate permissions (use API token is possible)
-   - VM template ready for use (with cloud-init if you need it)
-
-
 ## Configuration
 
 ### 1. Vars files
@@ -76,10 +76,10 @@ pveum aclmod / -user terraform-user@pve -role TerraformProv
 # Create terraform working directory
 terraform init
 
-# Deployement verification
+# Deployment verification
 terraform plan
 
-# Apply deploy/change
+# Apply deployment/change
 terraform apply
 ```
 
@@ -122,136 +122,178 @@ terraform apply
 
 ## Suggested template 
 
-| Profil | CPU | RAM | Disque | Usage |
+| Profil | CPU | RAM | Disk | Usage |
 |--------|-----|-----|--------|-------|
 | Micro | 1 | 1GB | 20G | Tests, light dev  |
 | Small | 2 | 4GB | 50G | Web services|
 | Medium | 4 | 8GB | 100G | Web apps |
-| Big | 8 | 16GB | 500G | BDD|
+| Big | 8 | 16GB | 500G | Database |
 | Very big | 16+ | 32GB+ | 1TB+ | Big data, virtualisation |
 
 ## Variables importantes
 
-### Configuration Proxmox
-- `proxmox_api_url` : URL de l'API Proxmox
-- `proxmox_user` : Utilisateur Proxmox
-- `proxmox_password` : Mot de passe
+### Provider config (Proxmox)
+```yaml
+proxmox_api_url : Promox API url https://yourprox:8006/api2/json
+proxmox_user : User or API token like "terraform-user@pve!terraform-token"
+proxmox_password : Password or API secret
+proxmox_tls_insecure = false # false for self-signed certificates
+```
 
-### Configuration VM
-- `name` : Nom unique de la VM
-- `target_node` : Nœud Proxmox cible
-- `template` : Template à cloner
-- `cores` : Nombre de cœurs CPU
-- `memory` : RAM en MB
-- `disk_size` : Taille du disque (ex: "50G")
-- `disk_storage` : Storage Proxmox
+### VM basic config
+```yaml
+name : VM name
+template : Name of the template to use
+cores : Cores numbers
+memory : RAM in MB
+disk_size : Size of the disk (ex: "50G")
+disk_storage : Proxmox storage name
+```
 
-## Outputs disponibles
+## Outputs available
 
-Le module génère plusieurs outputs utiles pour l'intégration avec Ansible :
+Module provide some outputs for VM information :
 
 ```bash
-# Voir toutes les informations des VMs
+# See all main information for all VMs
 terraform output vms_info
 
-# Récupérer les IPs pour Ansible
+# See only the IP address
 terraform output vm_ips
-
-# Mapping nom -> IP
-terraform output vm_inventory
 ```
 
-## Intégration avec Ansible
+## Ansible integration 
 
-Les outputs Terraform peuvent être utilisés pour générer automatiquement l'inventaire Ansible :
+Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing
+```hcl
+resource "null_resource" "update_inventory" {
+  for_each = module.vms
 
+  triggers = {
+    name     = each.value.vm_name
+    template = each.value.template
+    ip       = each.value.ip_address
+  }
+
+  provisioner "local-exec" {
+    when    = create
+    command = "bash ./scripts/add_to_inventory.sh '${self.triggers.name}' '${self.triggers.ip}' '${self.triggers.template}'"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "bash ./scripts/remove_from_inventory.sh '${self.triggers.name}'"
+  }
+
+  depends_on = [module.vms]
+}
+```
+
+Four pieces of information are used in the script to customize the inventory file to add ansible hosts, 3 of it are provided by terraform output :  
 ```bash
-# Générer un inventaire Ansible simple
-terraform output -json vm_inventory | jq -r 'to_entries[] | "\(.key) ansible_host=\(.value)"' > inventory
+VM_NAME="$1"
+VM_IP="$2"
+TEMPLATE_NAME="$3"
+INVENTORY_FILE="../config/inventory.ini"
 ```
 
-## Gestion des erreurs courantes
+This script is made actualy for 3 groups depending of the template used in terraform, you can easily customize it by editing "./Infra/scripts/add_to_inventory.sh" :   
+```bash
+if [[ "$TEMPLATE_NAME" == *deb* ]]; then
+  GROUP="Deb-SRV"
+elif [[ "$TEMPLATE_NAME" == *rocky* ]]; then
+  GROUP="Rocky-SRV"
+else
+  GROUP="Lab"
+fi
+```
+
+## Common mistakes
 
 ### Provider Proxmox
 ```bash
-# Si erreur de certificat TLS
-proxmox_tls_insecure = true
+# If tls certificate error
+proxmox_tls_insecure = true -> false
 ```
 
-### Templates manquants
-Vérifiez que vos templates existent :
+### bad template
+List and find your template :
 ```bash
-# Dans Proxmox CLI
-qm list | grep template
+# Proxmox CLI
+qm list 
 ```
 
-### Problèmes de permissions
-Vérifiez les permissions de l'utilisateur Terraform dans l'interface Proxmox.
+### Permissions denied for user/API token
+Verify your token as the correct permissions for create and manage VM :
+```
+VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
+```
 
-## Commandes utiles
-
+## Useful commands
 ```bash
-# Voir l'état actuel
+# show current state
 terraform state list
 
-# Détruire une VM spécifique
-terraform destroy -target=module.vms[\"nom-vm\"]
+# Destroy specific VM
+terraform destroy -target=module.vms[\"VM-name\"]
 
-# Détruire toutes les VMs
+# Destroy all VMs (CAREFUL)
 terraform destroy
 
-# Importer une VM existante
+# Remove VM in state file because someone destroy terraform deployed VM on proxmox UI
+terraform state rm 'module.vms[\"VM-name\"].proxmox_vm_qem.vm'
+
+# Import and existing VM
 terraform import 'module.vms[\"nom-vm\"].proxmox_vm_qemu.vm' proxmox-node:vmid
 
-# Rafraîchir l'état
+# Refresh state
 terraform refresh
 ```
 
-## Bonnes pratiques
+## Best practices
 
-### Sécurité
-1. **Ne jamais commiter** `terraform.tfvars` dans git
-2. Utiliser des **clés SSH** plutôt que des mots de passe
-3. Créer un **utilisateur dédié** Proxmox pour Terraform
-4. Utiliser des **certificats valides** si possible
+### Safety
+1. **Never commit** `terraform.tfvars` or sensitive information in git
+2. Use **SSH keys** instead of passwords
+3. Create a **dedicated** Proxmox user for Terraform
+4. Use **valid certificates** if possible
 
-### Organisation
-1. **Tagger** les VMs pour faciliter la gestion
-2. Utiliser des **noms descriptifs** et cohérents
-3. **Documenter** la configuration de chaque VM
-4. Faire des **sauvegardes** avant modifications importantes
+### Organization
+1. **Tag** VMs for easier management
+2. Use **descriptive** and consistent names
+3. **Document** each VM's configuration
+4. Make **backups** before major modifications
 
 ### Performance
-1. Utiliser le **type de disque approprié** (virtio pour les performances)
-2. Activer **l'agent QEMU** pour de meilleures informations
-3. Configurer **les ressources** selon l'usage réel
+1. Use the **appropriate disk type** (virtio for performance)
+2. Enable **QEMU agent** for better information
+3. Configure **resources** according to actual usage
 
-## Évolutions futures
+## Future developments
 
-Ce module peut être étendu pour supporter :
-- **Disques multiples** par VM
-- **Interfaces réseau multiples**
-- **Snapshots automatiques**
-- **Politique de sauvegarde**
-- **Monitoring intégré**
+This module can be extended to support :
+- Multiple **disks** per VM
+- Multiple network interfaces
+- Automatic snapshots
+
 
 ## Troubleshooting
 
-### VM qui ne démarre pas
-1. Vérifier les logs Proxmox
-2. Contrôler les ressources disponibles sur le nœud
-3. Vérifier la configuration du template
+### VM won't start
+1. Check Proxmox logs
+2. Check resources available on node
+3. Check template configuration
 
-### Problèmes réseau
-1. Vérifier la configuration du bridge
-2. Contrôler les VLANs si utilisés
-3. Vérifier cloud-init si IP statique
+### Network problems
+1. Check bridge configuration
+2. Check VLANs if used
+3. Check cloud-init if static IP
 
-### Terraform state corrompu
+### Terraform state corrupt
 ```bash
-# Sauvegarder l'état actuel
+# Backup current state
 cp terraform.tfstate terraform.tfstate.backup
 
-# Reconstruire l'état depuis Proxmox
+# Rebuild state from Proxmox
 terraform import ...
 ```
