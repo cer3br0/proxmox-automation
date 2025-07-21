@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VM_NAME="$1"
-INVENTORY_FILE="../config/inventory.ini"
+INVENTORY_FILE="../02-Config/inventory.ini"
 
 # Vérifie si le fichier existe
 if [ ! -f "$INVENTORY_FILE" ]; then

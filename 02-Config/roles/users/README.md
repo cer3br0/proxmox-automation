@@ -37,7 +37,7 @@ Compatibility for Debian and RedHat OS family
 
 ## Vault using
 
-**Warning:** Vault logic is implemented for password encryption. See line 32 in `tasks/main.yaml`:
+**Warning:** Vault logic is implemented for password encryption. See line 32 in `./tasks/main.yaml`:
 ```yaml
 password: "{{ vault_user_passwords[item.name] | default(omit) }}"
 ```
@@ -82,4 +82,4 @@ BSD
 
 ## Author Information
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Cer3br0

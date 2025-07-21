@@ -5,7 +5,7 @@
 ## Projet structure  
 
 ```
-Infra/
+01-Infra/
 ├── main.tf              # main terraform file
 ├── variables.tf         # root vars
 ├── outputs.tf           # root outputs
@@ -122,9 +122,9 @@ terraform output vm_ips
 
 # Ansible integration 
 
-## For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
+## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
 
-Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing
+Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing
 ```hcl
 resource "null_resource" "update_inventory" {
   for_each = module.vms
@@ -154,10 +154,10 @@ Four pieces of information are used in the script to customize the inventory fil
 VM_NAME="$1"
 VM_IP="$2"
 TEMPLATE_NAME="$3"
-INVENTORY_FILE="../config/inventory.ini"
+INVENTORY_FILE="../02-Config/inventory.ini"
 ```
 
-This script is made actualy for 3 groups depending of the template used in terraform, you can easily customize it by editing "./Infra/scripts/add_to_inventory.sh" :   
+This script is made actualy for 3 groups depending of the template used in terraform, you can easily customize it by editing "./01-Infra/scripts/add_to_inventory.sh" :   
 ```bash
 if [[ "$TEMPLATE_NAME" == *deb* ]]; then
   GROUP="Deb-SRV"

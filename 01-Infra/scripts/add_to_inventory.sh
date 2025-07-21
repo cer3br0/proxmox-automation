@@ -4,7 +4,7 @@
 VM_NAME="$1"
 VM_IP="$2"
 TEMPLATE_NAME="$3"
-INVENTORY_FILE="../config/inventory.ini"
+INVENTORY_FILE="../02-Config/inventory.ini"
 
 cp "$INVENTORY_FILE" "$INVENTORY_FILE.old"
 # Déterminer le groupe Ansible basé sur le nom du template

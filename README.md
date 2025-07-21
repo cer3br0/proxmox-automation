@@ -15,41 +15,44 @@ This project automates the deployment and configuration of VMs on Proxmox server
 
 There are 2 main directories in this projet :  
 ```
-Infra -> Terraform directory to create VM
+01-Infra -> Terraform directory to create VM
 - Cloud-init can be used to customize user/network/ssh key
 - Bash script to automatically add/remove the deployed/destroyed VM in the inventory.ini (ansible)
 
-config -> ansible directory with roles for :
+02-Config -> ansible directory with roles for :
 - create /manage users
 - hardening / config ssh
 - Config DNS/ host file
 - add packages
+
+03-Additional-scripts -> other resources for prox automation :
 ```
 
 ```
 Proxmox-automation
 .
-├── config
-│   ├── ansible.cfg
-│   ├── dns-config.yaml
-│   ├── inventory.ini
-│   ├── roles
-│   ├── sshd-config.yaml
-│   └── users.yaml
-└── Infra
+├── 01-Infra
     ├── main.tf
     ├── modules
     ├── outputs.tf
     ├── providers.tf
     ├── README.md
     ├── scripts
-    ├── terraform.tfstate.backup
-    ├── terraform.tfvars
     └── variables.tf
+└── 02-config
+│   ├── ansible.cfg
+│   ├── dns-config.yaml
+│   ├── inventory.ini
+│   ├── roles
+│   ├── sshd-config.yaml
+│   └── users.yaml
+└── 03-Additional-scritps
+│   ├── VM-power-management
+│   ├── ....
+
 ```
 
 ## Configuration
-
 
 ### Configuration Proxmox
 
@@ -64,13 +67,13 @@ pveum aclmod / -user terraform-user@pve -role TerraformProv
 
 # Terraform use
 
-## For information and configuration, please look at the README.md in directory **./Infra**
+## For information and configuration, please look at the README.md in directory **./01-Infra**
 
 # Ansible integration 
 
-Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
+Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
 
-## For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
+## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
 
 ## Common mistakes
 
