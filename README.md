@@ -12,40 +12,8 @@ This project automates the deployment and configuration of VMs on Proxmox server
 
 ## Architecture explanation 
 This project using terraform with vm module to deploy one or more VM on Proxmox server, and configure VM including roles for 
+![Infrastructure Workflow](./09-resources/infrastructure-workflow.svg)
 
-```mermaid
-graph TD
-    A[📁 Code Repository<br/>GitHub] --> B[⚙️ Configuration Phase]
-    
-    B --> B1[📝 Customize Terraform<br/>Variables]
-    B --> B2[🎭 Configure Ansible<br/>Templates & Variables]
-    
-    B1 --> C[🏗️ Terraform / OpenTofu<br/>Infrastructure as Code]
-    B2 --> C
-    
-    C --> D[🖥️ VMs Deployment<br/>on Proxmox]
-    
-    D --> E[📋 Inventory Management<br/>Scripts Bash]
-    
-    E --> F[⚡ Post-Deployment<br/>Provisioning Scripts]
-    
-    F --> G[🎯 Ansible Playbooks<br/>& Roles Execution]
-    
-    G --> H[✅ Configured<br/>Infrastructure]
-    
-    %% Styling
-    classDef primary fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef secondary fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
-    classDef tertiary fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px;
-    classDef quaternary fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    
-    class A primary;
-    class B,B1,B2 secondary;
-    class C,D tertiary;
-    class E,F,G quaternary;
-    class H primary;  
-    
-## Projet structure  
 
 There are 2 main directories in this projet :  
 ```
