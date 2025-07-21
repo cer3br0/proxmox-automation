@@ -1,38 +1,96 @@
-Role Name
-=========
+# Role Name
 
-A brief description of the role goes here.
+`dns-host`
 
-Requirements
-------------
+## Description
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role configures local DNS resolution on a Linux system by managing the `/etc/hosts` and `/etc/resolv.conf` files using Ansible templates.
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Compatible with Debian and RedHat OS families.
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+The role uses two main sets of variables defined in `./defaults/main.yml`:
 
-Example Playbook
-----------------
+### `custom_hosts`
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Defines static host entries to be written into `/etc/hosts`.
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+custom_hosts:
+  - ip: "xx.xx.xx.xx"
+    name: "host1"
+    aliases: ["gw", "dns1"]
+  - ip: "xx.xx.xx.xx"
+    name: "host2"
+  - ip: "xx.xx.xx.xx"
+    name: "host3"
+  - ip: "xx.xx.xx.xx"
+    name: "host4"
+    aliases: ["dns2"]
+  - ip: "xx.xx.xx.xx"
+    name: "host5"
+```
+Each entry must include an IP address and a hostname. Optionally, you can specify one or more aliases.
 
-License
--------
+nameservers
+A list of IP addresses to be added as nameserver entries in /etc/resolv.conf.
 
+```yaml
+nameservers:
+  - "xx.xx.xx.xx"
+  - "xx.xx.xx.xx"
+  - "xx.xx.xx.xx"
+
+search_domains:
+  - "home.lan"
+```
+
+### Templates
+The role uses two Jinja2 templates:
+
+hosts.j2: renders /etc/hosts using the custom_hosts variable.
+
+resolv.conf.j2: renders /etc/resolv.conf using nameservers and search_domains.
+
+Example generated /etc/hosts:
+```
+127.0.0.1       localhost
+::1             localhost
+192.168.1.1     host1 gw dns1
+192.168.1.2     host2
+Example generated /etc/resolv.conf:
+
+search home.lan
+nameserver 192.168.1.1
+nameserver 192.168.1.2
+```
+
+##Customization
+To modify host or DNS settings:
+
+Edit ./defaults/main.yml and adjust the values for:
+```
+- custom_hosts (for static hostnames)
+- nameservers (for DNS servers)
+- search_domains (for DNS search suffixes)
+```
+
+The role will automatically regenerate the config files based on your changes.
+
+##Example Playbook
+```yaml
+- name: Configure local DNS and hosts
+  hosts: all
+  become: true
+  roles:
+    - dns-host
+```
+
+##License
 BSD
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+##Author Information
+Cer3br0
