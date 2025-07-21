@@ -62,15 +62,15 @@ pveum role add TerraformProv -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Con
 pveum aclmod / -user terraform-user@pve -role TerraformProv
 ```
 
-## Terraform use
+# Terraform use
 
-# For information and configuration, please look at the README.md in directory **./Infra**
+## For information and configuration, please look at the README.md in directory **./Infra**
 
-## Ansible integration 
+# Ansible integration 
 
-# For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
+Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
 
-Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing
+## For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
 
 ## Common mistakes
 
@@ -132,12 +132,3 @@ This module can be extended to support :
 1. Check bridge configuration
 2. Check VLANs if used
 3. Check cloud-init if static IP
-
-### Terraform state corrupt
-```bash
-# Backup current state
-cp terraform.tfstate terraform.tfstate.backup
-
-# Rebuild state from Proxmox
-terraform import ...
-```
