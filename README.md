@@ -10,6 +10,40 @@ This project automates the deployment and configuration of VMs on Proxmox server
    - Dedicated user with appropriate permissions (using API token if possible)
    - VM template ready for use (with cloud-init if you need it)
 
+## Architecture explanation 
+This project using terraform with vm module to deploy one or more VM on Proxmox server, and configure VM including roles for 
+
+```mermaid
+graph TD
+    A[📁 Code Repository<br/>GitHub] --> B[⚙️ Configuration Phase]
+    
+    B --> B1[📝 Customize Terraform<br/>Variables]
+    B --> B2[🎭 Configure Ansible<br/>Templates & Variables]
+    
+    B1 --> C[🏗️ Terraform / Open tofu <br/>Infrastructure as Code]
+    B2 --> C
+    
+    C --> D[🖥️ VMs Deployment<br/>on Proxmox]
+    
+    D --> E[📋 Inventory Management<br/>Scripts Bash]
+    
+    E --> F[⚡ Post-Deployment<br/>Provisioning Scripts]
+    
+    F --> G[🎯 Ansible Playbooks<br/>& Roles Execution]
+    
+    G --> H[✅ Configured<br/>Infrastructure]
+    
+    %% Styling
+    classDef primary fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef secondary fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef tertiary fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef quaternary fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class A primary
+    class B,B1,B2 secondary
+    class C,D tertiary
+    class E,F,G quaternary
+    class H primary
 
 ## Projet structure  
 
@@ -25,7 +59,7 @@ There are 2 main directories in this projet :
 - Config DNS/ host file
 - add packages
 
-03-Additional-scripts -> other resources for prox automation :
+03-Additional-scripts -> other resources for proxmox automation :
 ```
 
 ```
@@ -43,6 +77,7 @@ Proxmox-automation
 │   ├── ansible.cfg
 │   ├── dns-config.yaml
 │   ├── inventory.ini
+│   ├── main.yaml
 │   ├── roles
 │   ├── sshd-config.yaml
 │   └── users.yaml
@@ -81,42 +116,86 @@ Terraform output are used to add/remove lines in the file ./02-Config/inventory.
 
 ## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
 
-## Common mistakes
+# 📋 Workflow Steps
 
-### Provider Proxmox
+## 1. 📁 **Source Code Management**
+```bash
+git clone <repository-url>
+cd infrastructure-project
+```
+
+## 2. ⚙️ **Configuration Phase**
+
+### 📝 Terraform Variables Configuration
+- Configure `terraform.tfvars` or `*.auto.tfvars`
+- Define VM specifications, network settings, and resources
+- Set Ansible roles per VM
+
+### 🎭 Ansible Templates & Variables Setup  
+- Configure inventory templates
+- Set up group_vars and host_vars
+- Prepare role-specific configurations
+- Define playbook variables
+
+## 3. 🏗️ **Infrastructure Deployment**
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+- Creates VMs on Proxmox
+- Provisions resources (CPU, RAM, Storage, Network)
+- Applies cloud-init configurations
+
+## 4. 📋 **Dynamic Inventory Management**
+- `add_to_inventory.sh` - Adds new VMs to Ansible inventory
+- `remove_from_inventory.sh` - Removes destroyed VMs from inventory
+- Updates inventory groups and host variables
+
+## 5. ⚡ **Post-Deployment Provisioning**
+```bash
+run_ansible.sh <vm_name> <vm_ip> <template> <roles...>
+```
+- Executes targeted Ansible playbooks
+- Applies specified roles to each VM
+- Configures services and applications
+
+# Common mistakes
+
+## Provider Proxmox
 ```bash
 # If tls certificate error
 proxmox_tls_insecure = true -> false
 ```
 
-### bad template
+## bad template
 List and find your template :
 ```bash
 # Proxmox CLI
 qm list 
 ```
 
-### Permissions denied for user/API token
+## Permissions denied for user/API token
 Verify your token as the correct permissions for create and manage VM :
 ```
 VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
 ```
 
-## Best practices
+# Best practices
 
-### Safety
+## Safety
 1. **Never commit** `terraform.tfvars` or sensitive information in git
 2. Use **SSH keys** instead of passwords
 3. Create a **dedicated** Proxmox user for Terraform
 4. Use **valid certificates** if possible
 
-### Organization
+## Organization
 1. **Tag** VMs for easier management
 2. Use **descriptive** and consistent names
 3. **Document** each VM's configuration
 4. Make **backups** before major modifications
 
-### Performance
+## Performance
 1. Use the **appropriate disk type** (virtio for performance)
 2. Enable **QEMU agent** for better information
 3. Configure **resources** according to actual usage
@@ -130,14 +209,14 @@ This module can be extended to support :
 - Add another roles specific configuration (database, webserver,...)
 
 
-## Troubleshooting
+# Troubleshooting
 
-### VM won't start
+## VM won't start
 1. Check Proxmox logs
 2. Check resources available on node
 3. Check template configuration
 
-### Network problems
+## Network problems
 1. Check bridge configuration
 2. Check VLANs if used
 3. Check cloud-init if static IP
