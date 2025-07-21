@@ -164,6 +164,8 @@ terraform output vm_ips
 
 ## Ansible integration 
 
+# For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
+
 Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing
 ```hcl
 resource "null_resource" "update_inventory" {
@@ -207,6 +209,7 @@ else
   GROUP="Lab"
 fi
 ```
+
 
 ## Common mistakes
 
@@ -275,6 +278,7 @@ This module can be extended to support :
 - Multiple **disks** per VM
 - Multiple network interfaces
 - Automatic snapshots
+- Add another roles specific configuration (database, webserver,...)
 
 
 ## Troubleshooting
