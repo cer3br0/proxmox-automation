@@ -22,11 +22,3 @@ output "vm_ips" {
   ]
 }
 
-# Mapping nom -> IP pour les inventaires
-output "vm_inventory" {
-  description = "Mapping nom de VM vers adresse IP"
-  value = {
-    for name, vm in module.vms : name => vm.ip_address
-    if vm.ip_address != null
-  }
-}
