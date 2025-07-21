@@ -68,7 +68,7 @@ nameserver 192.168.1.1
 nameserver 192.168.1.2
 ```
 
-##Customization
+## Customization
 To modify host or DNS settings:
 
 Edit ./defaults/main.yml and adjust the values for:
@@ -80,7 +80,7 @@ Edit ./defaults/main.yml and adjust the values for:
 
 The role will automatically regenerate the config files based on your changes.
 
-##Example Playbook
+## Example Playbook
 ```yaml
 - name: Configure local DNS and hosts
   hosts: all
@@ -89,8 +89,8 @@ The role will automatically regenerate the config files based on your changes.
     - dns-host
 ```
 
-##License
+## License
 BSD
 
-##Author Information
+## Author Information
 Cer3br0
