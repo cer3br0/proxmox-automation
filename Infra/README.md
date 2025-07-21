@@ -1,4 +1,4 @@
-# Proxmox VM Automation avec Terraform
+# Proxmox VM Automation with Terraform
 
 # Terraform 
 
@@ -8,9 +8,9 @@
 Infra/
 ├── main.tf              # main terraform file
 ├── variables.tf         # root vars
-├── outputs.tf          # root outputs
-├── providers.tf        # providers configuration
-├── terraform.tfvars    # Vars values
+├── outputs.tf           # root outputs
+├── providers.tf         # providers configuration
+├── terraform.tfvars     # Vars values
 └── modules/
     └── vm/
         ├── main.tf      # module VM resources
@@ -88,7 +88,7 @@ terraform apply
 | Big | 8 | 16GB | 500G | Database |
 | Very big | 16+ | 32GB+ | 1TB+ | Big data, virtualisation |
 
-## Variables importantes
+## Important variables
 
 ### Provider config (Proxmox)
 ```hcl
@@ -120,9 +120,9 @@ terraform output vms_info
 terraform output vm_ips
 ```
 
-## Ansible integration 
+# Ansible integration 
 
-# For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
+## For ansible information and configuration, please look at the README.md in each roles directory **./config/roles/**
 
 Terraform output are used to add/remove lines in the file ./config/inventory.ini via bash scripting ./Infra/scripts using a "null_resource" and provisionner local-exec for script executing
 ```hcl
