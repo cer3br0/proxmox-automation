@@ -134,9 +134,9 @@ terraform apply
 
 ### Provider config (Proxmox)
 ```hcl
-proxmox_api_url = Promox API url https://yourprox:8006/api2/json
-proxmox_user = User or API token like "terraform-user@pve!terraform-token"
-proxmox_password = Password or API secret
+proxmox_api_url = Promox API url #(ex: "https://yourprox:8006/api2/json")
+proxmox_user = User or API token #(ex: "terraform-user@pve!terraform-token")
+proxmox_password = Password or API secret #Use API for best practice
 proxmox_tls_insecure = false # false for self-signed certificates
 ```
 
