@@ -133,21 +133,21 @@ terraform apply
 ## Variables importantes
 
 ### Provider config (Proxmox)
-```yaml
-proxmox_api_url : Promox API url https://yourprox:8006/api2/json
-proxmox_user : User or API token like "terraform-user@pve!terraform-token"
-proxmox_password : Password or API secret
+```hcl
+proxmox_api_url = Promox API url https://yourprox:8006/api2/json
+proxmox_user = User or API token like "terraform-user@pve!terraform-token"
+proxmox_password = Password or API secret
 proxmox_tls_insecure = false # false for self-signed certificates
 ```
 
 ### VM basic config
-```yaml
-name : VM name
-template : Name of the template to use
-cores : Cores numbers
-memory : RAM in MB
-disk_size : Size of the disk (ex: "50G")
-disk_storage : Proxmox storage name
+```hcl
+name = VM name
+template = Name of the template to use
+cores = Cores numbers
+memory = RAM in MB
+disk_size = Size of the disk (ex: "50G")
+disk_storage = Proxmox storage name
 ```
 
 ## Outputs available
