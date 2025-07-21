@@ -1,69 +1,91 @@
-# Proxmox VM Automation avec Terraform
+# Proxmox VM Automation :  
 
-Ce projet permet d'automatiser le déploiement de machines virtuelles sur Proxmox en utilisant Terraform avec une approche modulaire.
+This projet automates the deployment and configuration of VMs on Proxmox server using Terraform and Ansible  
 
-## Structure du projet
+## Structure du projet  
+
+There are 2 main directory in this projet :  
+```
+Infra -> Terraform directory for create VM
+- Cloud-init can be use for custom user/network/ssh key
+- Bash script for auto add/delete the deployed/removed VM in the inventory.ini (ansible)
+
+config -> ansible directory with roles for :
+- create /manage users
+- hardening / config ssh
+- Config DNS/ host file
+- add packages
+```
 
 ```
-Infra/
-├── main.tf              # Point d'entrée principal
-├── variables.tf         # Variables du niveau root
-├── outputs.tf          # Sorties du niveau root
-├── providers.tf        # Configuration des providers
-├── terraform.tfvars    # Valeurs des variables (à créer)
-└── modules/
-    └── vm/
-        ├── main.tf      # Ressources du module VM
-        ├── variables.tf # Variables du module
-        └── outputs.tf   # Sorties du module
+Proxmox-automation
+.
+├── config
+│   ├── ansible.cfg
+│   ├── dns-config.yaml
+│   ├── inventory.ini
+│   ├── roles
+│   ├── sshd-config.yaml
+│   └── users.yaml
+└── Infra
+    ├── main.tf
+    ├── modules
+    ├── outputs.tf
+    ├── providers.tf
+    ├── README.md
+    ├── scripts
+    ├── terraform.tfstate.backup
+    ├── terraform.tfvars
+    └── variables.tf
 ```
 
-## Prérequis
+## Requirements
 
-1. **Terraform/OpenTofu** installé
-2. **Proxmox** configuré avec :
-   - Un utilisateur dédié avec permissions appropriées
-   - Des templates VM prêts à être clonés
-   - Storage configuré
+ **Terraform/OpenTofu** installed  
+ **Ansible**  installed  
+ **Proxmox** with :  
+   - Dedicated user with appropriate permissions (use API token is possible)
+   - VM template ready for use (with cloud-init if you need it)
+
 
 ## Configuration
 
-### 1. Fichier de variables
+### 1. Vars files
 
-Copiez le template et adaptez-le :
+Copy the template variable file and customize it :
 ```bash
 cp terraform.tfvars.template terraform.tfvars
 ```
 
 ### 2. Configuration Proxmox
 
-Créez un utilisateur dédié dans Proxmox :
+Create dedicated user in proxmox with good permissions :
 ```bash
-# Dans Proxmox
+# On Proxmox
 pveum user add terraform-user@pve
 pveum passwd terraform-user@pve
 pveum role add TerraformProv -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit"
 pveum aclmod / -user terraform-user@pve -role TerraformProv
 ```
 
-## Utilisation
+## How to use
 
-### Déploiement des VMs
+### Deployment
 
 ```bash
-# Initialiser Terraform
+# Create terraform working directory
 terraform init
 
-# Planifier le déploiement
+# Deployement verification
 terraform plan
 
-# Appliquer les changements
+# Apply deploy/change
 terraform apply
 ```
 
-### Exemples de configurations
+### Configurations examples
 
-#### VM Simple (Development)
+#### Simple VM (Development)
 ```hcl
 {
   name = "dev-vm"
@@ -76,7 +98,7 @@ terraform apply
 }
 ```
 
-#### VM avec Cloud-init
+#### VM with Cloud-init
 ```hcl
 {
   name = "web-server"
@@ -98,15 +120,15 @@ terraform apply
 }
 ```
 
-## Profils de ressources recommandés
+## Suggested template 
 
 | Profil | CPU | RAM | Disque | Usage |
 |--------|-----|-----|--------|-------|
-| Micro | 1 | 1GB | 20G | Tests, dev léger |
-| Petit | 2 | 4GB | 50G | Services web légers |
-| Moyen | 4 | 8GB | 100G | Applications web |
-| Gros | 8 | 16GB | 500G | Bases de données |
-| Très gros | 16+ | 32GB+ | 1TB+ | Big data, virtualisation |
+| Micro | 1 | 1GB | 20G | Tests, light dev  |
+| Small | 2 | 4GB | 50G | Web services|
+| Medium | 4 | 8GB | 100G | Web apps |
+| Big | 8 | 16GB | 500G | BDD|
+| Very big | 16+ | 32GB+ | 1TB+ | Big data, virtualisation |
 
 ## Variables importantes
 
