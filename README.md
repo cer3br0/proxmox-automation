@@ -71,6 +71,12 @@ pveum aclmod / -user terraform-user@pve -role TerraformProv
 
 # Ansible integration 
 
+For user compatibility and automation, ensure :  
+```
+- You have an ansible dedicated user with ssh public key include in all your VMs templates
+- You use terraform and cloud init to create an ansible dedicated user with ssh key when deploying
+```
+
 Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
 
 ## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
