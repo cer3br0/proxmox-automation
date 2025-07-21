@@ -16,7 +16,6 @@ module "vms" {
   vmid        = each.value.vmid
   template    = each.value.template
   description = each.value.description
-  roles       = join(",", each.value.ansible_roles)
 
   # Ressources
   cores    = each.value.cores
@@ -75,7 +74,7 @@ resource "null_resource" "ansible_provision" {
     name     = each.value.vm_name
     template = each.value.template
     ip       = each.value.ip_address
-    roles   = join(",", each.value.ansible_roles)
+    roles    = each.value.ansible_roles
   }
 
   provisioner "local-exec" {
