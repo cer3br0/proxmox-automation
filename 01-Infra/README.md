@@ -11,6 +11,7 @@
 ├── outputs.tf           # root outputs
 ├── providers.tf         # providers configuration
 ├── terraform.tfvars     # Vars values
+├── scripts/             # Bash script for ansible automation
 └── modules/
     └── vm/
         ├── main.tf      # module VM resources
@@ -67,7 +68,7 @@ terraform apply
   disk_size = "100G"
   disk_storage = "local-lvm"
   cloud_init = {
-    user = "admin"
+    user = "ansible"
     ssh_keys = ["ssh-rsa AAAAB..."]
     ip_config = {
       ip = "192.168.1.100/24"
@@ -92,9 +93,9 @@ terraform apply
 
 ### Provider config (Proxmox)
 ```hcl
-proxmox_api_url = Promox API url #(ex: "https://yourprox:8006/api2/json")
-proxmox_user = User or API token #(ex: "terraform-user@pve!terraform-token")
-proxmox_password = Password or API secret #Use API for best practice
+proxmox_api_url = Promox API url # (ex: "https://yourprox:8006/api2/json")
+proxmox_user = User or API token # (ex: "terraform-user@pve!terraform-token")
+proxmox_password = Password or API secret # Use API for best practice
 proxmox_tls_insecure = false # false for self-signed certificates
 ```
 
@@ -124,7 +125,8 @@ terraform output vm_ips
 
 ## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
 
-Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing
+Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
+
 ```hcl
 resource "null_resource" "update_inventory" {
   for_each = module.vms
@@ -166,6 +168,75 @@ elif [[ "$TEMPLATE_NAME" == *rocky* ]]; then
 else
   GROUP="Lab"
 fi
+```
+
+## Playbook auto execution
+Terraform use another local-exec provisionner to run script ./01-Infra/scripts/run_ansible.sh
+
+### You have to set up the ansible roles you need to execute for each VM deployed with Terraform
+```hcl
+vms = [
+  # Exemple: Serveur Web
+  {
+    name          = "web-server-01"
+    target_node   = "proxmox-node-1"
+    vmid          = 201  # Optionnel, laissez null pour auto-généré
+    template      = "ubuntu-22.04-template"
+    description   = "Serveur web Apache/Nginx"
+    ansible_roles = ["sshd", "dns-host", "users", "packages"]
+    ...
+  }
+  {
+    name          = "database"
+    target_node   = "proxmox-node-1"
+    vmid          = 202  # Optionnel, laissez null pour auto-généré
+    template      = "ubuntu-22.04-template"
+    description   = "mysql
+    ansible_roles = ["sshd", "dns-host", "users"]
+    ...
+  }
+]
+```
+Provisionner block :  
+```hcl
+resource "null_resource" "ansible_provision" {
+  for_each = module.vms
+
+  triggers = {
+    name     = each.value.vm_name
+    template = each.value.template
+    ip       = each.value.ip_address
+    roles    = join(",", local.vm_roles[each.value.vm_name])
+  }
+
+  provisioner "local-exec" {
+    command = "bash ./scripts/run_ansible.sh '${self.triggers.name}' '${self.triggers.ip}' '${self.triggers.template}' ${join(" ", local.vm_roles[each.value.vm_name])}"
+  }
+  depends_on = [null_resource.update_inventory]
+  
+}
+```
+This script convert the data to json to ensure that is transmitted correctly.  
+The same logic is used for apply playbook to VM group in ansible inventory : 
+```bash
+if [[ "$TEMPLATE_NAME" == *deb* ]]; then
+  GROUP="Deb-SRV"
+elif [[ "$TEMPLATE_NAME" == *rocky* ]]; then
+  GROUP="Rocky-srv"
+else
+  GROUP="Lab"
+fi
+```
+Please customize it for your use case. 
+There is and echo command displaying the final command used by ansible for playbook execution, then you can see if ansible group and roles you want to execute are correct :
+```bash 
+echo "commande lancée : ansible-playbook ../02-Config/main.yaml \
+  -i ../02-Config/inventory.ini \
+  --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible"
+# Lancer ansible-playbook avec tags ou rôles dynamiques
+ansible-playbook ../02-Config/main.yaml \
+  -i ../02-Config/inventory.ini \
+  --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible
 ```
 
 ## Useful commands
