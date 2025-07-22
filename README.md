@@ -10,25 +10,12 @@ This project automates the deployment and configuration of VMs on Proxmox server
    - Dedicated user with appropriate permissions (using API token if possible)
    - VM template ready for use (with cloud-init if you need it)
 
+
 ## Architecture explanation 
-This project using terraform with vm module to deploy one or more VM on Proxmox server, and configure VM including roles for 
+This automation project using terraform with vm module to deploy one or more VM on Proxmox server, and configure VMs with ansible role
 ![Infrastructure Workflow](./09-resources/infrastructure_diagram.png)
 
-There are 2 main directories in this projet :  
-```
-01-Infra -> Terraform directory to create VM
-- Cloud-init can be used to customize user/network/ssh key
-- Bash script to automatically add/remove the deployed/destroyed VM in the inventory.ini (ansible)
-
-02-Config -> ansible directory with roles for :
-- create /manage users
-- hardening / config ssh
-- Config DNS/ host file
-- add packages
-
-03-Additional-scripts -> other resources for proxmox automation :
-```
-
+## Project structure
 ```
 Proxmox-automation
 .
@@ -53,12 +40,39 @@ Proxmox-automation
 │   ├── ....
 
 ```
+There are 2 main directories in this projet :  
+```
+01-Infra -> Terraform directory to create VM
+- Cloud-init can be used to customize user/network/ssh key
+- Bash script to automatically add/remove the deployed/destroyed VM in the inventory.ini (ansible)
+- Bash script for automatically execute playbook associate to deployed VMs
 
+02-Config -> ansible directory with roles for :
+- create /manage users
+- hardening / config ssh
+- Config DNS/ host file
+- add packages
+
+03-Additional-scripts -> other resources for proxmox automation 
+```
+## 📋 Workflow Steps
+
+### 1. 📁 **Source Code Management**
+```bash
+git clone https://github.com/cer3br0/proxmox-automation.git
+cd proxmox-automation
+```
+### 2. ⚙️ **Configuration Phase**
 ## Configuration
 
-### Configuration Proxmox
+### Proxmox
+Ensure you have : 
+```
+- Template(s) ready for deployment
+- Dedicated user for terraform with API Token
+```
 
-Create dedicated user in proxmox with good permissions :
+To Create dedicated user in proxmox with good permissions :
 ```bash
 # On Proxmox
 pveum user add terraform-user@pve
@@ -67,9 +81,45 @@ pveum role add TerraformProv -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Con
 pveum aclmod / -user terraform-user@pve -role TerraformProv
 ```
 
-# Terraform use
+### 🎭 Ansible Templates & Variables Setup  
+- Configure inventory templates
+- Set up vars in each role -> default/main.yml or vars/main.yml
+- Add another role if you need it
+- Prepare role-specific configurations
 
-## For information and configuration, please look at the README.md in directory **./01-Infra**
+### 📝 Terraform Variables Configuration
+- Configure `terraform.tfvars` or `*.auto.tfvars`
+- Define VM specifications, network settings, and resources
+- Set Ansible roles per VM using roles names -> ansible_roles = ["sshd", "dns-host", "users"]
+
+### 3. 🏗️ **Infrastructure Deployment**  
+Navigate to 01-Infra directory :  
+```bash
+tofu init
+tofu plan
+tofu apply
+```
+- Creates VMs on Proxmox
+- Provisions resources (CPU, RAM, Storage, Network)
+- Applies cloud-init configurations  
+
+Terraform triggers are used to add/remove lines in the file ./02-Config/inventory.ini and execute playbook via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec.  
+
+### 4. 📋 **Dynamic Inventory Management**
+- `add_to_inventory.sh` - Adds new VMs to Ansible inventory
+- `remove_from_inventory.sh` - Removes destroyed VMs from inventory
+
+## 5. ⚡ **Post-Deployment Provisioning**
+```bash
+run_ansible.sh <vm_name> <vm_ip> <template> <roles...>
+```
+This script :  
+```
+- Executes targeted Ansible playbooks -> ./02-Config/main.yaml
+- Applies specified roles to each VM
+```
+# Terraform use  
+## For information and configuration of Terraform, please look at the README.md in directory **./01-Infra**
 
 # Ansible integration 
 
@@ -79,53 +129,7 @@ For user compatibility and automation, ensure :
 - You use terraform and cloud init to create an ansible dedicated user with ssh key when deploying
 ```
 
-Terraform output are used to add/remove lines in the file ./02-Config/inventory.ini via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec for script executing  
-
 ## For ansible information and configuration, please look at the README.md in each roles directory **./02-Config/roles/**
-
-# 📋 Workflow Steps
-
-## 1. 📁 **Source Code Management**
-```bash
-git clone <repository-url>
-cd infrastructure-project
-```
-
-## 2. ⚙️ **Configuration Phase**
-
-### 📝 Terraform Variables Configuration
-- Configure `terraform.tfvars` or `*.auto.tfvars`
-- Define VM specifications, network settings, and resources
-- Set Ansible roles per VM
-
-### 🎭 Ansible Templates & Variables Setup  
-- Configure inventory templates
-- Set up group_vars and host_vars
-- Prepare role-specific configurations
-- Define playbook variables
-
-## 3. 🏗️ **Infrastructure Deployment**
-```bash
-terraform init
-terraform plan
-terraform apply
-```
-- Creates VMs on Proxmox
-- Provisions resources (CPU, RAM, Storage, Network)
-- Applies cloud-init configurations
-
-## 4. 📋 **Dynamic Inventory Management**
-- `add_to_inventory.sh` - Adds new VMs to Ansible inventory
-- `remove_from_inventory.sh` - Removes destroyed VMs from inventory
-- Updates inventory groups and host variables
-
-## 5. ⚡ **Post-Deployment Provisioning**
-```bash
-run_ansible.sh <vm_name> <vm_ip> <template> <roles...>
-```
-- Executes targeted Ansible playbooks
-- Applies specified roles to each VM
-- Configures services and applications
 
 # Common mistakes
 
