@@ -24,7 +24,7 @@
 
 Copy the template variable file and customize it :
 ```bash
-cp terraform.tfvars.template terraform.tfvars
+cp example.terraform.tfvars terraform.tfvars
 ```
 ## How to use
 
