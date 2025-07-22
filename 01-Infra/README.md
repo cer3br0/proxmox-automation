@@ -230,10 +230,12 @@ fi
 Please customize it for your use case. 
 There is and echo command displaying the final command used by ansible for playbook execution, then you can see if ansible group and roles you want to execute are correct :
 ```bash 
+#debug command
 echo "commande lancée : ansible-playbook ../02-Config/main.yaml \
   -i ../02-Config/inventory.ini \
   --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible"
-# Lancer ansible-playbook avec tags ou rôles dynamiques
+
+# execute command
 ansible-playbook ../02-Config/main.yaml \
   -i ../02-Config/inventory.ini \
   --extra-vars "{\"target\":\"$GROUP\", \"roles\":$roles_list}" -u ansible
