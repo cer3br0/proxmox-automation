@@ -183,7 +183,7 @@ vms = [
     vmid          = 201  # Optionnel, laissez null pour auto-généré
     template      = "ubuntu-22.04-template"
     description   = "Serveur web Apache/Nginx"
-    ansible_roles = ["sshd", "dns-host", "users", "packages"]
+    ansible_roles = ["sshd", "dns-host", "users", "packages"]         <---------------------
     ...
   }
   {
@@ -192,7 +192,7 @@ vms = [
     vmid          = 202  # Optionnel, laissez null pour auto-généré
     template      = "ubuntu-22.04-template"
     description   = "mysql
-    ansible_roles = ["sshd", "dns-host", "users"]
+    ansible_roles = ["sshd", "dns-host", "users"]             <---------------------
     ...
   }
 ]
