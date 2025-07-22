@@ -191,7 +191,7 @@ vms = [
     target_node   = "proxmox-node-1"
     vmid          = 202  # Optionnel, laissez null pour auto-généré
     template      = "ubuntu-22.04-template"
-    description   = "mysql
+    description   = "mysql"
     ansible_roles = ["sshd", "dns-host", "users"]  #           <---------------------
     ...
   }
