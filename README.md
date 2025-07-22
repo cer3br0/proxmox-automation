@@ -35,7 +35,7 @@ Proxmox-automation
 │   ├── roles
 │   ├── sshd-config.yaml
 │   └── users.yaml
-└── 03-Additional-scritps
+└── 03-Additional-scripts
 │   ├── VM-power-management
 │   ├── ....
 
@@ -103,7 +103,7 @@ tofu apply
 - Provisions resources (CPU, RAM, Storage, Network)
 - Applies cloud-init configurations  
 
-Terraform triggers are used to add/remove lines in the file ./02-Config/inventory.ini and execute playbook via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec.  
+### Terraform triggers are used to add/remove lines in the file ./02-Config/inventory.ini and execute playbook via bash scripting ./01-Infra/scripts using a "null_resource" and provisionner local-exec.  
 
 ### 4. 📋 **Dynamic Inventory Management**
 - `add_to_inventory.sh` - Adds new VMs to Ansible inventory
