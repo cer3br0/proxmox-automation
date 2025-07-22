@@ -7,7 +7,7 @@ This project automates the deployment and configuration of VMs on Proxmox server
  **Terraform/OpenTofu** installed  
  **Ansible**  installed  
  **Proxmox** with:  
-   - Dedicated user with appropriate permissions (using API token if possible)
+   - Dedicated Proxmox user with appropriate permissions (using API token if possible)
    - VM template ready for use (with cloud-init if you need it)
 
 
@@ -113,10 +113,10 @@ tofu apply
 ```bash
 run_ansible.sh <vm_name> <vm_ip> <template> <roles...>
 ```
-This script :  
+This script is automatically execute by terraform local-exec provisioner and :  
 ```
 - Executes targeted Ansible playbooks -> ./02-Config/main.yaml
-- Applies specified roles to each VM
+- Applies specified roles for each VM
 ```
 # Terraform use  
 ## For information and configuration of Terraform, please look at the README.md in directory **./01-Infra**
@@ -139,14 +139,14 @@ For user compatibility and automation, ensure :
 proxmox_tls_insecure = true -> false
 ```
 
-## bad template
-List and find your template :
+## Bad template
+List and find your templates :
 ```bash
 # Proxmox CLI
 qm list 
 ```
 
-## Permissions denied for user/API token
+## Permissions denied for user/API token when apply 
 Verify your token as the correct permissions for create and manage VM :
 ```
 VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
@@ -157,13 +157,14 @@ VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config
 ## Safety
 1. **Never commit** `terraform.tfvars` or sensitive information in git
 2. Use **SSH keys** instead of passwords
-3. Create a **dedicated** Proxmox user for Terraform
+3. Create a **dedicated** Proxmox user for Terraform with API key
 4. Use **valid certificates** if possible
+5. Use Ansible vault for secrets 
 
 ## Organization
 1. **Tag** VMs for easier management
 2. Use **descriptive** and consistent names
-3. **Document** each VM's configuration
+3. **Document** each VM's configuration and Ansible roles
 4. Make **backups** before major modifications
 
 ## Performance
@@ -177,7 +178,7 @@ This module can be extended to support :
 - Multiple **disks** per VM
 - Multiple network interfaces
 - Automatic snapshots
-- Add another roles specific configuration (database, webserver,...)
+- Add another roles for specific configuration (database, webserver, docker...)
 
 
 # Troubleshooting
