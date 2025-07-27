@@ -1,0 +1,9 @@
+galaxy_info:
+  author: cer3br0
+  description: Install Docker CE on Debian 12
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
