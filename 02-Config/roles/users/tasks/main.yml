@@ -13,82 +13,97 @@
 
 - name: Create groups
   group:
-    name: "{{ item.name }}"
-    gid: "{{ item.gid | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
+    name: "{{ group.name }}"
+    gid: "{{ group.gid | default(omit) }}"
+    state: "{{ group.state | default('present') }}"
   loop: "{{ users_groups }}"
+  loop_control:
+    loop_var: group
   become: true
 
 - name: Create users
   user:
-    name: "{{ item.name }}"
-    uid: "{{ item.uid | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
-    groups: "{{ item.groups | default([admin_group]) | join(',') }}"
-    shell: "{{ item.shell | default(users_default_shell) }}"
-    home: "{{ item.home | default('/home/' + item.name) }}"
-    create_home: "{{ item.create_home | default(true) }}"
-    password:  "{{ vault_user_passwords[item.name] | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
+    name: "{{ user.name }}"
+    uid: "{{ user.uid | default(omit) }}"
+    group: "{{ user.group | default(omit) }}"
+    groups: "{{ user.groups | default([admin_group]) | join(',') }}"
+    shell: "{{ user.shell | default(users_default_shell) }}"
+    home: "{{ user.home | default('/home/' + user.name) }}"
+    create_home: "{{ user.create_home | default(true) }}"
+    password:  "{{ vault_user_passwords[user.name] | default(omit) }}"
+    state: "{{ user.state | default('present') }}"
   loop: "{{ users_list }}"
+  loop_control:
+    loop_var: user
   become: true
+
 
 
 - name: Set home directory permissions
   file:
-    path: "{{ item.home | default('/home/' + item.name) }}"
-    owner: "{{ item.name }}"
-    group: "{{ item.group | default(item.name) }}"
-    mode: "{{ item.home_mode | default(755) }}"
+    path: "{{ u.home | default('/home/' + u.name) }}"
+    owner: "{{ u.name }}"
+    group: "{{ u.group | default(u.name) }}"
+    mode: "{{ u.home_mode | default(755) }}"
     state: directory
   loop: "{{ users_list }}"
+  loop_control:
+    loop_var: u  
   become: true
   when: 
-    - item.state | default('present') == 'present'
-    - item.create_home | default(true)
+    - u.state | default('present') == 'present'
+    - u.create_home | default(true)
 
 - name: Create .ssh directory
   file:
-    path: "{{ item.home | default('/home/' + item.name) }}/.ssh"
-    owner: "{{ item.name }}"
-    group: "{{ item.group | default(item.name) }}"
+    path: "{{ ssh_dir.home | default('/home/' + ssh_dir.name) }}/.ssh"
+    owner: "{{ ssh_dir.name }}"
+    group: "{{ ssh_dir.group | default(ssh_dir.name) }}"
     mode: '0700'
     state: directory
   loop: "{{ users_list }}"
+  loop_control:
+    loop_var: ssh_dir
   become: true
   when: 
-    - item.state | default('present') == 'present'
-    - item.ssh_key is defined
+    - ssh_dir.state | default('present') == 'present'
+    - ssh_dir.ssh_key is defined
 
 - name: Add SSH public keys
   authorized_key:
-    user: "{{ item.name }}"
-    key: "{{ item.ssh_key }}"
+    user: "{{ ssh_pub.name }}"
+    key: "{{ ssh_pub.ssh_key }}"
     state: present
   loop: "{{ users_list }}"
+  loop_control:
+    loop_var: ssh_pub
   become: true
   when: 
-    - item.state | default('present') == 'present'
-    - item.ssh_key is defined
+    - ssh_pub.state | default('present') == 'present'
+    - ssh_pub.ssh_key is defined
 
 - name: Configure bashrc
   template:
     src: bashrc.j2
-    dest: "{{ item.home | default('/home/' + item.name) }}/.bashrc"
-    owner: "{{ item.name }}"
-    group: "{{ item.group | default(item.name) }}"
+    dest: "{{ bashrc.home | default('/home/' + bashrc.name) }}/.bashrc"
+    owner: "{{ bashrc.name }}"
+    group: "{{ bashrc.group | default(bashrc.name) }}"
     mode: '0644'
     backup: true
   loop: "{{ users_list }}"
+  loop_control:
+    loop_var: bashrc
   become: true
   when: 
-    - item.state == 'present'
+    - bashrc.state == 'present'
     - users_configure_bashrc
 
 - name: Remove users
   user:
-    name: "{{ item.name }}"
+    name: "{{ u_del.name }}"
     state: absent
-    remove: "{{ item.remove_home | default(false) }}"
+    remove: "{{ u_del.remove_home | default(false) }}"
   loop: "{{ users_remove }}"
+  loop_control:
+    loop_var: u_del
   become: true
