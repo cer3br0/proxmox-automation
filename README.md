@@ -79,7 +79,10 @@ pveum user add terraform-user@pve
 pveum passwd terraform-user@pve
 pveum role add TerraformProv -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit"
 pveum aclmod / -user terraform-user@pve -role TerraformProv
-```
+pveum user token add terraform-user@pve terraform-token --comment "Token for Terraform usage" --enable 1
+pveum aclmod / -token terraform-user@pve!terraform-token -role TerraformProv
+```  
+Ensure you save the token value in secret manager.  
 
 ### 🎭 Ansible Templates & Variables Setup  
 - Configure inventory templates
@@ -95,9 +98,9 @@ pveum aclmod / -user terraform-user@pve -role TerraformProv
 ### 3. 🏗️ **Infrastructure Deployment**  
 Navigate to 01-Infra directory :  
 ```bash
-tofu init
-tofu plan
-tofu apply
+tofu init #or terraform init
+tofu plan #or terraform plan
+tofu apply  #or terraform apply
 ```
 - Creates VMs on Proxmox
 - Provisions resources (CPU, RAM, Storage, Network)
@@ -115,8 +118,8 @@ run_ansible.sh <vm_name> <vm_ip> <template> <roles...>
 ```
 This script is automatically execute by terraform local-exec provisioner and :  
 ```
-- Executes targeted Ansible playbooks -> ./02-Config/main.yaml
-- Applies specified roles for each VM
+- Execute target Ansible playbooks -> ./02-Config/main.yaml
+- Apply specified roles for each VM
 ```
 # Terraform use  
 ## For information and configuration of Terraform, please look at the README.md in directory **./01-Infra**
@@ -143,7 +146,7 @@ proxmox_tls_insecure = true -> false
 List and find your templates :
 ```bash
 # Proxmox CLI
-qm list 
+qm list | awk '{print$2}'
 ```
 
 ## Permissions denied for user/API token when apply 
