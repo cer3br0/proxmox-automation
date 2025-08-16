@@ -1,26 +1,21 @@
 ---
 # defaults file for roles/deb-os-update
-# Type d'upgrade apt : 'safe' (upgrade), 'full' (full-upgrade) ou 'dist' (dist-upgrade).
+# Type  of upgrade apt : 'safe' (upgrade), 'full' (full-upgrade) or 'dist' (dist-upgrade).
 os_upgrade_type: "dist"
 
-# Evite les prompts interactifs et conserve tes confs locales.
+# Avoid interactive prompts and keep local configs.
 os_dpkg_options: "force-confdef,force-confold"
 
-# Evite de retélécharger les index trop souvent.
+# Avoid reloading the index too often.
 os_cache_valid_time: 3600
 
-# Nettoyage après upgrade.
+# Clean after upgrade
 os_autoremove: true
 os_autoclean: true
 
-# Redémarrer si nécessaire (kernel, libc, etc.)
+# Reboot if necessary (kernel, libc, etc.)
 os_reboot_if_required: true
 os_reboot_timeout: 600
 
-# Garantit l’existence du marqueur /var/run/reboot-required
-# (utile pour décider du reboot proprement)
-os_install_update_notifier: true  # paquet update-notifier-common
-
-# Contrôle des redémarrages de services pendant l’upgrade
-# (évite les blocages de needrestart en non-interactif)
+# Reboot control while upgrade
 os_needrestart_mode: "a"  # a = auto (redémarre les services touchés)
