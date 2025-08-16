@@ -1,0 +1,61 @@
+---
+# tasks file for roles/deb-os-update
+
+- name: Ensure required packages are present
+  become: true
+  ansible.builtin.apt:
+    name:
+      - needrestart
+    state: present
+    update_cache: true
+    cache_valid_time: "{{ os_cache_valid_time }}"
+
+- name: Configure needrestart to be non-interactive
+  become: true
+  ansible.builtin.template:
+    src: needrestart.conf.j2
+    dest: /etc/needrestart/needrestart.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Update APT cache (fresh enough)
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: "{{ os_cache_valid_time }}"
+
+- name: Upgrade packages
+  become: true
+  ansible.builtin.apt:
+    upgrade: "{{ os_upgrade_type }}"
+    dpkg_options: "{{ os_dpkg_options }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    NEEDRESTART_MODE: "{{ os_needrestart_mode }}"
+
+- name: Autoremove unused packages
+  when: os_autoremove | bool
+  become: true
+  ansible.builtin.apt:
+    autoremove: true
+
+- name: Autoclean APT cache
+  when: os_autoclean | bool
+  become: true
+  ansible.builtin.apt:
+    autoclean: true
+
+- name: Check if reboot is required
+  become: true
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: os_reboot_flag
+
+- name: Reboot if required
+  when:
+    - os_reboot_if_required | bool
+    - os_reboot_flag.stat.exists | default(false)
+  become: true
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ os_reboot_timeout }}"

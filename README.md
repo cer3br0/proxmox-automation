@@ -78,7 +78,7 @@ To Create dedicated user in proxmox with good permissions :
 pveum user add terraform-user@pve
 pveum passwd terraform-user@pve
 pveum role add TerraformProv -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit"
-pveum aclmod / -user terraform-user@pve -role TerraformProv
+pveum aclmod / -user terraform-user@pve -role TerraformProv # this one is not necessary if you use token
 pveum user token add terraform-user@pve terraform-token --comment "Token for Terraform usage" --enable 1
 pveum aclmod / -token terraform-user@pve!terraform-token -role TerraformProv
 ```  
